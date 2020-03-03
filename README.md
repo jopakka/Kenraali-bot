@@ -1,1 +1,2 @@
-# Kenraali-bot
+# Kenraali Bot
+Erittäin eeppinen discord botti
