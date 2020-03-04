@@ -32,9 +32,6 @@ module.exports = {
                     const json = JSON.parse(data).results;
                     for (let i = 0; i < json.length; i++) {
                         let rank = "";
-                        if (json[i].p_currentrank === 1) {
-                            rank = 
-                        }
                         const r6stat = new Discord.RichEmbed()
                             .setColor('#0099ff')
                             .setTitle(json[i].p_name)
