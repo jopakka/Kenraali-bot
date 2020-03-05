@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const https = require('https');
-const siegePlayer = require("./../classes/SiegePlayer");
+const siegePlayer = require("../classes/SiegePlayer");
 const {
     prefix
 } = require("../config.json");
