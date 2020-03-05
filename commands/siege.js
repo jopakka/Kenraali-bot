@@ -9,7 +9,7 @@ module.exports = {
     name: "siege",
     desc: "Inform other to come play Rainbow six: Siege",
     cooldown: 3,
-    execute(message, args) {
+    async execute(message, args) {
         if (args.length === 0) {
             const time = new Date();
             const minutes = time.getMinutes();
