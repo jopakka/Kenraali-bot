@@ -8,7 +8,8 @@ const {
 module.exports = {
     name: "siege",
     desc: "Inform other to come play Rainbow six: Siege",
-    cooldown: 3,
+    usage: ` || ${prefix} <command>`,
+    cooldown: 5,
     async execute(message, args) {
         if (args.length === 0) {
             const time = new Date();
@@ -27,12 +28,10 @@ module.exports = {
             if (services.indexOf(args[0]) !== -1) {
                 const url = "https://r6tab.com/api/";
 
-                https.get(url + "search.php?platform=" + args[0] + "&search=" + args[1], response => {
+                https.get(`${url}search.php?platform=${args[0]}&search=${args[1]}`, response => {
                     let data = "";
 
-                    response.on("data", stuff => {
-                        data += stuff;
-                    });
+                    response.on("data", stuff => data += stuff);
 
                     response.on("end", () => {
                         const searchJson = JSON.parse(data).results;

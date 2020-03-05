@@ -1,8 +1,12 @@
+const {
+    prefix
+} = require("../config.json");
+
 module.exports = {
     name: "avatar",
     desc: "Show users avatar",
     aliases: ["icon", "pfp"],
-    usage: "<user>",
+    usage: ` || ${prefix} <user>`,
     execute(message, args) {
         if (!message.mentions.users.size) {
             return message.channel.send(`Your avatar: ${message.author.displayAvatarURL}`);
