@@ -10,7 +10,5 @@ module.exports = {
         if (message.author.id !== "352478941891788800") return;
 
         console.log(message.content)
-
-        message.channel.send()
     }
 };

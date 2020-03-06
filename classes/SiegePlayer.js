@@ -1,4 +1,4 @@
-const operators = require("../constants.js").siegeOperators;
+const operators = require("../constants/siegeOperators");
 
 class SiegePlayer {
     constructor(json) {
