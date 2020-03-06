@@ -11,7 +11,7 @@ module.exports = {
     usage: ` || ${prefix} <command>`,
     cooldown: 5,
     async execute(message, args) {
-        if (args.length === 0) {
+        if (!args.length) {
             const time = new Date();
             const minutes = time.getMinutes();
 

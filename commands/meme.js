@@ -11,7 +11,7 @@ module.exports = {
     usage: ` || ${prefix}meme <template>`,
     cooldown: 3,
     execute(message, args) {
-        if (args.length === 0) {
+        if (!args.length) {
             let reply = "**All available templates:**\n";
             reply += memeTemplates.map(meme => meme.name).join("\n");
 
