@@ -6,10 +6,15 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jopakka/Kenraali-bot.git"
+  },
   "dependencies": {
-    "canvas": "^2.6.1",
     "discord.js": "^11.6.1",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "fuse.js": "^3.4.6",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "nodemon": "^1.19.4"
