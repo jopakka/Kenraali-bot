@@ -5,6 +5,10 @@
     usage: "<user>",
     guildOnly: true,
     execute(message, args) {
+        if (!message.mentions.users.size) {
+            return message.reply("No valid user mentioned.");
+        }
+
         const member = message.mentions.members.first();
 
         if (!message.member.hasPermission("KICK_MEMBERS")) {
