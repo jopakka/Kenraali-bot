@@ -12,7 +12,7 @@ module.exports = {
             limit: args[0],
         });
 
-        message.channel.bulkDelete(fetched)
+        return message.channel.bulkDelete(fetched)
             .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
     }
 };
