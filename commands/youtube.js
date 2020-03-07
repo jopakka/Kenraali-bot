@@ -7,6 +7,7 @@ const {
 module.exports = {
     name: "youtube",
     desc: "Play youtube videos on audio channel.",
+    aliases: ['yt'],
     usage: `<search>`,
     cooldown: 3,
     args: true,
@@ -34,7 +35,8 @@ module.exports = {
         function playVideo(url) {
             voiceChannel.join().then(connection => {
                 const stream = ytdl(url, { filter: 'audioonly' });
-                connection.playStream(stream);
+                const dispatcher = connection.playStream(stream);
+                dispatcher.on('end', () => voiceChannel.leave());
             }).catch(error => console.log(error));
         }
     }
