@@ -11,7 +11,6 @@ module.exports = {
     execute(message, args) {
         const commandData = [];
         const { commands, secrets } = message.client;
-        console.log(secrets)
 
         if (!args.length) {
             commandData.push('Here\'s a list of all my commands:');
