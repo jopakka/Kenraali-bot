@@ -24,6 +24,6 @@
 
         return member.kick(reason)
             .then(() => message.reply(`${member.user.tag} was kicked.`))
-            .catch(error => message.reply(`I couldn't kick ${member} because ${error}`);
+            .catch(error => message.reply(`I couldn't kick ${member} because ${error}`));
     }
 }
