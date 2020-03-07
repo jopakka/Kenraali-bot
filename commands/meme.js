@@ -14,7 +14,7 @@ module.exports = {
     execute(message, args) {
         if (!args.length) {
             let reply = "**All available templates:**\n";
-            reply += memeTemplates.map(meme => meme.name).join("\n");
+            reply += memeTemplates.map(meme => `${meme.name} **Boxes:** ${meme.box_count}`).join("\n");
 
             return message.author.send(reply, { split: true })
                 .then(() => {
@@ -48,7 +48,7 @@ module.exports = {
             }
 
             let botReply = `**Your search results. Choose correct template by replying with corresponding number.**\n**Send "exit" to quit**\n`;
-            botReply += result.map((res, index) => `[${index+1}] ${res.name}`).join("\n");
+            botReply += result.map((res, index) => `[${index + 1}] ${res.name}`).join("\n");
 
             const filter = reply => reply.author.id === message.author.id
                 && parseInt(reply.content) > 0
@@ -57,7 +57,7 @@ module.exports = {
 
             message.channel.send(botReply).then(() => {
                 message.channel.awaitMessages(filter, { maxMatches: 1, time: 30000, errors: [`time`] })
-                    .then(collected => {
+                    .then(async collected => {
                         const text = collected.values().next().value.content;
                         if (text.toLowerCase() === "exit") {
                             stopped();
@@ -80,12 +80,13 @@ module.exports = {
                 const filter = reply => reply.author.id === message.author.id;
                 message.channel.send(botText).then(() => {
                     message.channel.awaitMessages(filter, { maxMatches: 1, time: 30000, errors: [`time`] })
-                        .then(collected => {
+                        .then(async collected => {
                             const text = collected.values().next().value.content;
                             if (text.toLowerCase() === "exit") {
                                 stopped();
                                 return message.reply("You stopped meme maker");
                             }
+                            await purgeOld(2);
                             memeTexts.push(text);
                             fillMeme(template, index);
                         }).catch(error => {
@@ -107,8 +108,15 @@ module.exports = {
                 request({ url: `https://api.imgflip.com/caption_image`, method: `post`, qs: params }, (error, response, body) => {
                     if (error) return console.error(error);
                     const json = JSON.parse(body)
-                    return message.reply(json.data[`url`]);
+                    return message.channel.send(json.data[`url`]);
                 })
+            }
+
+            async function purgeOld(amount) {
+                if (message.channel.type === 'dm') return;
+                const fetched = await message.channel.fetchMessages({ limit: amount });
+                message.channel.bulkDelete(fetched)
+                    .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
             }
 
             function started() {

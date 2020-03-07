@@ -9,7 +9,7 @@ module.exports = {
         if (typeof (args) !== "number" || args[0] < 2 || args[0] > 100) return message.reply("Give valid value between 2 and 100");
 
         const fetched = await message.channel.fetchMessages({
-            limit: args[0],
+            limit: args[0]
         });
 
         return message.channel.bulkDelete(fetched)
