@@ -1,14 +1,13 @@
-const {
-    prefix
-} = require("../config.json");
-
 module.exports = {
     name: "test",
     desc: "just test",
-    secret: true,
-    execute(message, args) {
+    async execute(message, args) {
         if (message.author.id !== "352478941891788800") return;
 
-        console.log(message.content)
+        const fetched = await message.channel.fetchMessages({
+            limit: 5,
+        });
+        message.channel.bulkDelete(fetched)
+            .catch(error => console.log(`Couldn't delete messages because of: ${error}`));
     }
 };

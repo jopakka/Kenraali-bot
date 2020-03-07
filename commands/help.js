@@ -9,15 +9,17 @@ module.exports = {
     usage: ` || ${prefix}help <command>`,
     cooldown: 5,
     execute(message, args) {
-        const data = [];
-        const { commands } = message.client;
+        const commandData = [];
+        const { commands, secrets } = message.client;
+        console.log(secrets)
 
         if (!args.length) {
-            data.push('Here\'s a list of all my commands:');
-            data.push(commands.filter(command => !command.secret || typeof (command.secret) === "undefined").map(command => `${prefix}${command.name}`).join('\n'));
-            data.push(`\nYou can send \`${prefix}help <command name>\` to get info on a specific command!`);
+            commandData.push('Here\'s a list of all my commands:');
+            commandData.push(commands.filter(command => !command.secret || typeof (command.secret) === "undefined")
+                .map(command => `${prefix}${command.name}`).join('\n'));
+            commandData.push(`\nYou can send \`${prefix}help <command name>\` to get info on a specific command!`);
 
-            return message.author.send(data, { split: true })
+            return message.author.send(commandData, { split: true })
                 .then(() => {
                     if (message.channel.type === 'dm') return;
                     message.reply('I\'ve sent you a DM with all my commands!');
@@ -30,21 +32,20 @@ module.exports = {
 
         const name = args[0].toLowerCase();
         const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
+        const secret = secrets.get(name) || secrets.find(c => c.aliases && c.aliases.includes(name));
 
-        if (!command) {
-            return message.reply('that\'s not a valid command!');
-        }
+        if (!command && !secret) return message.reply('That\'s not a valid command!');
 
-        if (command.secret) return message.reply("You just tried to look help to secret command");
+        if (secret) return message.reply("You just tried to look help to secret command");
 
-        data.push(`**Name:** ${command.name}`);
-        if (command.aliases) data.push(`**Aliases:** ${command.aliases.join(', ')}`);
-        if (command.description) data.push(`**Description:** ${command.description}`);
-        data.push(`**Usage:** ${prefix}${command.name} ${command.usage || ""}`);
-        data.push(`**Cooldown:** ${command.cooldown || 2} second(s)`);
-        if(command.guildOnly) data.push(`**Server only command**`);
+        commandData.push(`**Name:** ${command.name}`);
+        if (command.aliases) commandData.push(`**Aliases:** ${command.aliases.join(', ')}`);
+        if (command.description) commandData.push(`**Description:** ${command.description}`);
+        commandData.push(`**Usage:** ${prefix}${command.name} ${command.usage || ""}`);
+        commandData.push(`**Cooldown:** ${command.cooldown || 2} second(s)`);
+        if(command.guildOnly) commandData.push(`**Server only command**`);
 
-        message.channel.send(data, { split: true });
+        message.channel.send(commandData, { split: true });
 
     }
 }
