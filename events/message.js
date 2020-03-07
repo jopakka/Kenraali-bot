@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const cooldowns = new Discord.Collection();
+const makingMeme = new Discord.Collection();
 const {
     prefix
 } = require("../config.json");
@@ -9,8 +10,20 @@ module.exports = async (client, message) => {
 
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
-    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    const command = client.commands.get(commandName)
+        || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+        || client.secrets.get(commandName)
+        || client.secrets.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
+
+    if (command === null) return message.reply("Sorry I don't know that one");
+
+    // meme checker starts
+
+    if (message.content.startsWith(prefix) && makingMeme.get(message.author.id)) return;
+    if (makingMeme.has(message.author.id)) setTimeout(() => makingMeme.delete(message.author.id), 2 * 60 * 1000);
+
+    // meme checker ends
     // Cooldown starts
 
     if (!cooldowns.has(command.name)) cooldowns.set(command.name, new Discord.Collection());
@@ -24,7 +37,7 @@ module.exports = async (client, message) => {
 
         if (now < expirationTime) {
             const timeLeft = (expirationTime - now) / 1000;
-            return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+            return message.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
         }
     }
 
@@ -60,3 +73,5 @@ module.exports = async (client, message) => {
         message.reply("Cannot execute that command!");
     }
 }
+
+module.exports.makingMeme = makingMeme;

@@ -13,6 +13,8 @@ fs.readdir('./events/', (err, files) => {
 
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
+
+client.secrets = new Discord.Collection();
 const secretFiles = fs.readdirSync("./secrets").filter(file => file.endsWith(".js"));
 
 for (const file of commandFiles) {
@@ -21,8 +23,8 @@ for (const file of commandFiles) {
 }
 
 for (const file of secretFiles) {
-    const command = require(`./secrets/${file}`);
-    client.commands.set(command.name, command);
+    const secret = require(`./secrets/${file}`);
+    client.secrets.set(secret.name, secret);
 }
 
 client.login(process.env.BOT_TOKEN);

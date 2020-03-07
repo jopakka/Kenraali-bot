@@ -1,6 +1,7 @@
 const request = require("request");
 const Fuse = require("fuse.js");
 const memeTemplates = require("../constants/memeTemplates");
+const makingMeme = require(`../events/message`).makingMeme;
 const {
     prefix
 } = require("../config.json");
@@ -39,53 +40,63 @@ module.exports = {
 
             const fuse = new Fuse(memeTemplates, options);
             const result = fuse.search(args.join(" "));
+
             if (result.length === 0) return message.reply("No templates found");
             else if (result.length === 1) {
                 message.reply(`Selected meme: ${result[0].name}\nText boxes: ${result[0].box_count}\n`);
                 return fillMeme(result[0], 0);
             }
 
-            let reply = `**Your search results. Choose correct template by replying with corresponding number.**\n**Send "exit" to quit**\n`;
-            reply += result.map((res, index) => `[${index+1}] ${res.name}`).join("\n");
-
-            message.channel.send(reply);
+            let botReply = `**Your search results. Choose correct template by replying with corresponding number.**\n**Send "exit" to quit**\n`;
+            botReply += result.map((res, index) => `[${index+1}] ${res.name}`).join("\n");
 
             const filter = reply => reply.author.id === message.author.id
                 && parseInt(reply.content) > 0
-                && parseInt(reply.content) < result.length
+                && parseInt(reply.content) <= result.length
                 || reply.content === "exit";
-            const collector = message.channel.createMessageCollector(filter, { maxMatches: 1, time: 300000 });
 
-            collector.on('collect', m => {
-                
-            });
-
-            collector.on('end', collected => {
-                
-                collected.forEach(x => {
-                    if (x.content === "exit") return message.reply("You stopped meme maker");
-                    fillMeme(result[x - 1], 0);
-                })
+            message.channel.send(botReply).then(() => {
+                message.channel.awaitMessages(filter, { maxMatches: 1, time: 30000, errors: [`time`] })
+                    .then(collected => {
+                        const text = collected.values().next().value.content;
+                        if (text.toLowerCase() === "exit") {
+                            stopped();
+                            return message.reply("You stopped meme maker");
+                        }
+                        return fillMeme(result[text - 1], 0);
+                    }).catch(error => {
+                        stopped();
+                        message.reply(`Meme making time runs out.`);
+                    })
             });
 
             function fillMeme(template, index) {
+                started();
                 if (index === template.box_count) return buildMeme(template);
+
                 index++;
-                message.channel.send(`Give text to box: ${index}\nSend "exit" to quit.`);
+                const botText = `Give text to box: ${index}\nSend "exit" to quit.`;
+
                 const filter = reply => reply.author.id === message.author.id;
-                const collector = message.channel.createMessageCollector(filter, { maxMatches: 1, time: 300000 });
-
-                collector.on('collect', m => {
-                    if (m.content === "exit") return message.reply("You stopped meme maker");
-                    memeTexts.push(m.content);
-                });
-
-                collector.on('end', collected => {
-                    fillMeme(template, index);
+                message.channel.send(botText).then(() => {
+                    message.channel.awaitMessages(filter, { maxMatches: 1, time: 30000, errors: [`time`] })
+                        .then(collected => {
+                            const text = collected.values().next().value.content;
+                            if (text.toLowerCase() === "exit") {
+                                stopped();
+                                return message.reply("You stopped meme maker");
+                            }
+                            memeTexts.push(text);
+                            fillMeme(template, index);
+                        }).catch(error => {
+                            stopped();
+                            message.reply(`Meme making time runs out.`);
+                        })
                 });
             }
 
             function buildMeme(template) {
+                stopped();
                 const params = {
                     template_id: template.id,
                     username: process.env.IMGFLIP_USERNAME,
@@ -95,10 +106,17 @@ module.exports = {
 
                 request({ url: `https://api.imgflip.com/caption_image`, method: `post`, qs: params }, (error, response, body) => {
                     if (error) return console.error(error);
-                    //console.log(`Get response: ${response.statusCode}`);
                     const json = JSON.parse(body)
                     return message.reply(json.data[`url`]);
                 })
+            }
+
+            function started() {
+                makingMeme.set(message.author.id, true);
+            }
+
+            function stopped() {
+                makingMeme.set(message.author.id, false);
             }
         }
     }

@@ -6,4 +6,3 @@ bin
 obj
 *.njsproj
 *.njsproj.user
-secrets
