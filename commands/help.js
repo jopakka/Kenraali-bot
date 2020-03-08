@@ -10,12 +10,13 @@ module.exports = {
     cooldown: 5,
     execute(message, args) {
         const commandData = [];
-        const { commands, secrets } = message.client;
+        const { commands, games } = message.client;
 
         if (!args.length) {
             commandData.push('Here\'s a list of all my commands:');
-            commandData.push(commands.filter(command => !command.secret || typeof (command.secret) === "undefined")
-                .map(command => `${prefix}${command.name}`).join('\n'));
+            commandData.push(commands.map(command => `${prefix}${command.name}`).join('\n'));
+            commandData.push(`\n**Games:**`);
+            commandData.push(games.map(game => `${prefix}${game.name}`).join('\n'));
             commandData.push(`\nYou can send \`${prefix}help <command name>\` to get info on a specific command!`);
 
             return message.author.send(commandData, { split: true })

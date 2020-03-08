@@ -12,6 +12,8 @@ module.exports = async (client, message) => {
     const commandName = args.shift().toLowerCase();
     const command = client.commands.get(commandName)
         || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
+        || client.games.get(commandName)
+        || client.games.find(cmd => cmd.aliases && cmd.aliases.includes(commandName))
         || client.secrets.get(commandName)
         || client.secrets.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
