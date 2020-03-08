@@ -1,6 +1,6 @@
 module.exports = {
     name: "punish",
-    desc: "You can punish your friends",
+    desc: "Punish your friends",
     usage: '<user>',
     cooldown: 5,
     args: true,
