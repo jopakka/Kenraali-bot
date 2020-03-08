@@ -48,7 +48,7 @@ module.exports = {
             }
 
             let botReply = `**Your search results. Choose correct template by replying with corresponding number.**\n**Send "exit" to quit**\n`;
-            botReply += result.map((res, index) => `[${index + 1}] ${res.name}`).join("\n");
+            botReply += result.map((res, index) => `[${index + 1}] ${res.name} **Boxes:** ${meme.box_count}`).join("\n");
 
             const filter = reply => reply.author.id === message.author.id
                 && parseInt(reply.content) > 0
