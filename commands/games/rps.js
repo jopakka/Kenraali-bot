@@ -1,5 +1,3 @@
-const Fuse = require("fuse.js");
-
 module.exports = {
     name: "rps",
     desc: "Rock paper scissors",
