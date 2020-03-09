@@ -6,3 +6,4 @@ bin
 obj
 *.njsproj
 *.njsproj.user
+.git
