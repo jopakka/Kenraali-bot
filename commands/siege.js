@@ -8,7 +8,7 @@ const {
 module.exports = {
     name: "siege",
     desc: "Inform other to come play Rainbow six: Siege",
-    usage: ` || ${prefix}siege <command> || ${prefix}siege <platform> <player>`,
+    usage: ` | ${prefix}siege <command> | ${prefix}siege <platform> <player>`,
     cooldown: 5,
     async execute(message, args) {
         if (!args.length) {
@@ -42,21 +42,21 @@ module.exports = {
                         const json = JSON.parse(iBody);
                         const player = new siegePlayer(json);
 
-                        const minStats = new Discord.RichEmbed()
+                        const minStats = new Discord.MessageEmbed()
                             .setColor('#0099ff')
                             .setTitle(player.name)
                             .setThumbnail(`https://ubisoft-avatars.akamaized.net\/${player.userId}/default_256_256.png`)
                             .addField('Level', player.level, true)
                             .addField('Current MMR', player.currentmmr, true)
                             .addField('Max MMR', player.maxmmr, true)
-                            .addBlankField()
+                            .addField('\u200b', '\u200b', false)
                             .addField("Favorite attacker", player.favattacker, true)
                             .addField("Favorite defender", player.favdefender, true)
-                            .addBlankField()
+                            .addField('\u200b', '\u200b', false)
                             .addField("Ranked K/D", player.rankedKD, true)
                             .addField("Ranked kills", player.rankedKills, true)
                             .addField("Ranked deaths", player.rankedDeaths, true)
-                            .addBlankField()
+                            .addField('\u200b', '\u200b', false)
                             .addField("Ranked W/L", player.rankedWL, true)
                             .addField("Ranked wins", player.rankedWins, true)
                             .addField("Ranked loses", player.rankedLoses, true)

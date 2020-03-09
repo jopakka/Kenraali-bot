@@ -5,7 +5,7 @@ const {
 module.exports = {
     name: "rl",
     desc: "Inform other to come play Rocket League",
-    usage: ` || ${prefix} <command>`,
+    usage: ` | ${prefix} <command>`,
     guildOnly: true,
     execute(message, args) {
         if (!args.length) {

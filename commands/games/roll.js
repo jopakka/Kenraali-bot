@@ -5,7 +5,7 @@ const {
 module.exports = {
     name: "roll",
     desc: "Roll a dice",
-    usage: ` || ${prefix}roll <max> || ${prefix}roll <start> <end>`,
+    usage: ` | ${prefix}roll <max> | ${prefix}roll <start> <end>`,
     execute(message, args) {
         const first = parseInt(args[0]);
         const second = parseInt(args[1]);

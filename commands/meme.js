@@ -9,25 +9,27 @@ const {
 module.exports = {
     name: "meme",
     desc: "Make your own memes!",
-    usage: ` || ${prefix}meme <template>`,
+    usage: ` | ${prefix}meme <template>`,
     cooldown: 3,
-    execute(message, args) {
+    async execute(message, args) {
+        const author = message.author;
+        const originalChannel = message.channel;
+        const dmChannel = await author.createDM();
+        let memeTexts = [];
+
         if (!args.length) {
             let reply = "**All available templates:**\n";
             reply += memeTemplates.map(meme => `${meme.name} **Boxes:** ${meme.box_count}`).join("\n");
 
-            return message.author.send(reply, { split: true })
+            return dmChannel.send(reply, { split: true })
                 .then(() => {
                     if (message.channel.type === 'dm') return;
                     message.reply('I\'ve sent you a DM with all available meme templates!');
-                })
-                .catch(error => {
+                }).catch(error => {
                     console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
                     message.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
                 });
         } else {
-            let memeTexts = [];
-
             const options = {
                 shouldSort: true,
                 threshold: 0.3,
@@ -43,89 +45,84 @@ module.exports = {
 
             if (result.length === 0) return message.reply("No templates found");
             else if (result.length === 1) {
-                message.reply(`Selected meme: ${result[0].name}\nText boxes: ${result[0].box_count}\n`);
+                const reply = `Selected meme: ${result[0].name}\nText boxes: ${result[0].box_count}`;
+                await checkDM(reply);
                 return fillMeme(result[0], 0);
             }
 
             let botReply = `**Your search results. Choose correct template by replying with corresponding number.**\n**Send "exit" to quit**\n`;
-            botReply += result.map((res, index) => `[${index + 1}] ${res.name} **Boxes:** ${meme.box_count}`).join("\n");
+            botReply += result.map((meme, index) => `[${index + 1}] ${meme.name} **Boxes:** ${meme.box_count}`).join("\n");
+
+            await checkDM(botReply);
 
             const filter = reply => reply.author.id === message.author.id
                 && parseInt(reply.content) > 0
-                && parseInt(reply.content) <= result.length
-                || reply.content === "exit";
+                && parseInt(reply.content) <= result.length;
 
-            message.channel.send(botReply).then(() => {
-                message.channel.awaitMessages(filter, { maxMatches: 1, time: 30000, errors: [`time`] })
-                    .then(async collected => {
-                        const text = collected.values().next().value.content;
-                        if (text.toLowerCase() === "exit") {
-                            stopped();
-                            return message.reply("You stopped meme maker");
-                        }
-                        return fillMeme(result[text - 1], 0);
-                    }).catch(error => {
-                        stopped();
-                        message.reply(`Meme making time runs out.`);
-                    })
-            });
-
-            function fillMeme(template, index) {
-                started();
-                if (index === template.box_count) return buildMeme(template);
-
-                index++;
-                const botText = `Give text to box: ${index}\nSend "exit" to quit.`;
-
-                const filter = reply => reply.author.id === message.author.id;
-                message.channel.send(botText).then(() => {
-                    message.channel.awaitMessages(filter, { maxMatches: 1, time: 30000, errors: [`time`] })
-                        .then(async collected => {
-                            const text = collected.values().next().value.content;
-                            if (text.toLowerCase() === "exit") {
-                                stopped();
-                                return message.reply("You stopped meme maker");
-                            }
-                            await purgeOld(2);
-                            memeTexts.push(text);
-                            fillMeme(template, index);
-                        }).catch(error => {
-                            stopped();
-                            message.reply(`Meme making time runs out.`);
-                        })
-                });
-            }
-
-            function buildMeme(template) {
-                stopped();
-                const params = {
-                    template_id: template.id,
-                    username: process.env.IMGFLIP_USERNAME,
-                    password: process.env.IMGFLIP_PASSWORD,
-                    boxes: memeTexts.map(text => ({ text: text }))
-                }
-
-                request({ url: `https://api.imgflip.com/caption_image`, method: `post`, qs: params }, (error, response, body) => {
-                    if (error) return console.error(error);
-                    const json = JSON.parse(body)
-                    return message.channel.send(json.data[`url`]);
+            await dmChannel.awaitMessages(filter, { max: 1, time: 30000, errors: [`time`] })
+                .then(async collected => {
+                    const msg = collected.values().next().value.content;
+                    return fillMeme(result[msg - 1], 0);
+                }).catch(error => {
+                    console.log(error);
+                    return dmChannel.send("I'm out");
                 })
+        }
+
+        async function fillMeme(template, index) {
+            started();
+            if (index === template.box_count) return buildMeme(template);
+
+            index++;
+            const botText = `Give text to box: ${index}\nSend "exit" to quit.`;
+
+            await dmChannel.send(botText);
+
+            const filter = reply => reply.author.id === author.id;
+            await dmChannel.awaitMessages(filter, { max: 1, time: 30000, errors: [`time`] })
+                .then(collected => {
+                    const msg = collected.values().next().value.content;
+                    if (msg === "exit") {
+                        stopped();
+                        return dmChannel.send("You stopped meme making");
+                    }
+                    memeTexts.push(msg);
+                    fillMeme(template, index);
+                }).catch(error => {
+                    console.log(error);
+                    return dmChannel.send("I'm out");
+                })
+        }
+
+        function buildMeme(template) {
+            stopped();
+            const params = {
+                template_id: template.id,
+                username: process.env.IMGFLIP_USERNAME,
+                password: process.env.IMGFLIP_PASSWORD,
+                boxes: memeTexts.map(text => ({ text: text }))
             }
 
-            async function purgeOld(amount) {
-                if (message.channel.type === 'dm') return;
-                const fetched = await message.channel.fetchMessages({ limit: amount });
-                message.channel.bulkDelete(fetched)
-                    .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
-            }
+            request({ url: `https://api.imgflip.com/caption_image`, method: `post`, qs: params }, (error, response, body) => {
+                if (error) return console.error(error);
+                const json = JSON.parse(body)
+                return originalChannel.send(json.data[`url`]);
+            })
+        }
 
-            function started() {
-                makingMeme.set(message.author.id, true);
-            }
+        function started() {
+            makingMeme.set(message.author.id, true);
+        }
 
-            function stopped() {
-                makingMeme.set(message.author.id, false);
-            }
+        function stopped() {
+            makingMeme.set(message.author.id, false);
+        }
+
+        async function checkDM(botReply) {
+            await dmChannel.send(botReply).then(async () => {
+                if (originalChannel.type === "dm") return;
+                await message.reply("check your DM");
+            });
         }
     }
 }

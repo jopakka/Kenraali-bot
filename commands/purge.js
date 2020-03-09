@@ -10,7 +10,7 @@ module.exports = {
         const amount = parseInt(args[0]);
         if (amount < 2 || amount > 100) return message.reply("Give valid value between 2 and 100");
 
-        const fetched = await message.channel.fetchMessages({
+        const fetched = await message.channel.messages.fetch({
             limit: amount
         });
 
