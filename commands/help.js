@@ -6,11 +6,11 @@ module.exports = {
     name: "help",
     desc: "List all of my commands or info about a specific command.",
     aliases: ['commands'],
-    usage: ` || ${prefix}help <command>`,
+    usage: ` | ${prefix}help <command>`,
     cooldown: 5,
     execute(message, args) {
         const commandData = [];
-        const { commands, games } = message.client;
+        const { commands, games, secrets } = message.client;
 
         if (!args.length) {
             commandData.push('Here\'s a list of all my commands:');
@@ -30,8 +30,13 @@ module.exports = {
                 });
         }
 
+        console.log(commands)
+        console.log(games)
+        console.log(secrets)
+
         const name = args[0].toLowerCase();
-        const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
+        const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name))
+            || games.get(name) || games.find(c => c.aliases && c.aliases.includes(name));
         const secret = secrets.get(name) || secrets.find(c => c.aliases && c.aliases.includes(name));
 
         if (!command && !secret) return message.reply('That\'s not a valid command!');

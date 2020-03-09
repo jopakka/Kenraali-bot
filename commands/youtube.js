@@ -1,8 +1,5 @@
 const ytdl = require('ytdl-core');
 const ytsr = require('ytsr');
-const {
-    prefix
-} = require("../config.json");
 
 module.exports = {
     name: "youtube",
@@ -13,7 +10,7 @@ module.exports = {
     args: true,
     guildOnly: true,
     execute(message, args) {
-        const { voiceChannel } = message.member;
+        const voiceChannel = message.member.voice.channel;
 
         if (!voiceChannel) return message.reply('Please join a voice channel first!');
 
@@ -35,7 +32,7 @@ module.exports = {
         function playVideo(url) {
             voiceChannel.join().then(connection => {
                 const stream = ytdl(url, { filter: 'audioonly' });
-                const dispatcher = connection.playStream(stream);
+                const dispatcher = connection.play(stream);
                 dispatcher.on('end', () => voiceChannel.leave());
             }).catch(error => console.log(error));
         }
