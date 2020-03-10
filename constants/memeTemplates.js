@@ -1,4 +1,4 @@
-const memeTemplates = [
+module.exports = memeTemplates = [
     {
         "id": "181913649",
         "name": "Drake Hotline Bling",
@@ -900,5 +900,3 @@ const memeTemplates = [
 
     }
 ]
-
-module.exports = memeTemplates;

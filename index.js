@@ -13,25 +13,22 @@ fs.readdir('./events/', (err, files) => {
     });
 });
 
-client.commands = new Discord.Collection();
+// Commands
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
-
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
 
-client.games = new Discord.Collection();
+// Games
 const gameFiles = fs.readdirSync("./commands/games").filter(file => file.endsWith(".js"));
-
 for (const file of gameFiles) {
     const game = require(`./commands/games/${file}`);
     client.games.set(game.name, game);
 }
 
-client.secrets = new Discord.Collection();
+// Secrets :)
 const secretFiles = fs.readdirSync("./secrets").filter(file => file.endsWith(".js"));
-
 for (const file of secretFiles) {
     const secret = require(`./secrets/${file}`);
     client.secrets.set(secret.name, secret);
