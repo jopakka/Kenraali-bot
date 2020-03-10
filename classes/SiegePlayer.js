@@ -1,16 +1,16 @@
-const operators = require("../constants/siegeOperators");
+const operators = require(`../constants/siegeOperators`);
 
 class SiegePlayer {
     constructor(json) {
-        const regions = ["NA", "EU", "AS"];
+        const regions = [`NA`, `EU`, `AS`];
         const times = [new Date(json.ranked.NA_updatedon).valueOf(), new Date(json.ranked.EU_updatedon).valueOf(), new Date(json.ranked.AS_updatedon).valueOf()];
 
-        const mmr = regions[times.indexOf(Math.max.apply(null, times))] + "_mmr";
+        const mmr = regions[times.indexOf(Math.max.apply(null, times))] + `_mmr`;
 
         this.name = json.p_name;
         this.userId = json.p_user;
         this.level = json.p_level;
-        this.updated = (json.updatedon).replace(/[</u>]/g, "");
+        this.updated = (json.updatedon).replace(/[</u>]/g, ``);
 
         for (const x of operators) {
             if (json.favattacker === x.operatorID) {

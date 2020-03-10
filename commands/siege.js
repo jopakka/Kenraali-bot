@@ -8,7 +8,7 @@ const {
 module.exports = {
     name: "siege",
     desc: "Inform other to come play Rainbow six: Siege",
-    usage: ` | ${prefix}siege <command> | ${prefix}siege <platform> <player>`,
+    usage: `, ${prefix}siege <command> , ${prefix}siege <platform> <player>`,
     cooldown: 5,
     async execute(message, args) {
         if (!args.length) {
@@ -16,12 +16,12 @@ module.exports = {
             const minutes = time.getMinutes();
 
             if (minutes < 45 && minutes > 15) {
-                message.channel.send("Tasalt siege?");
+                return message.channel.send("Tasalt siege?");
             } else if (minutes >= 45 || minutes <= 15) {
-                message.channel.send("Puolelt siege?");
+                return message.channel.send("Puolelt siege?");
             }
         } else if (args[0] === "now") {
-            message.channel.send("Nyt siege!");
+            return message.channel.send("Nyt siege!", { tts: true });
         } else if (args.length === 2) {
             const services = ["uplay", "psn", "xbl"];
 
@@ -45,7 +45,7 @@ module.exports = {
                         const minStats = new Discord.MessageEmbed()
                             .setColor('#0099ff')
                             .setTitle(player.name)
-                            .setThumbnail(`https://ubisoft-avatars.akamaized.net\/${player.userId}/default_256_256.png`)
+                            .setThumbnail(`https://ubisoft-avatars.akamaized.net/${player.userId}/default_256_256.png`)
                             .addField('Level', player.level, true)
                             .addField('Current MMR', player.currentmmr, true)
                             .addField('Max MMR', player.maxmmr, true)
@@ -62,7 +62,7 @@ module.exports = {
                             .addField("Ranked loses", player.rankedLoses, true)
                             .setFooter(player.updated)
 
-                        message.channel.send(minStats);
+                        return message.channel.send(minStats);
                     })
                 }
             });

@@ -1,7 +1,9 @@
 const fs = require('fs');
 require("dotenv").config();
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const Client = require(`./classes/Client`);
+
+const client = new Client();
 
 fs.readdir('./events/', (err, files) => {
     files.forEach(file => {

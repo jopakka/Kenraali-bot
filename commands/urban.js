@@ -7,7 +7,7 @@ const {
 module.exports = {
     name: "urban",
     desc: "Urban dictionary",
-    usage: ` | ${prefix}urban <word>`,
+    usage: `, ${prefix}urban <word>`,
     cooldown: 5,
     execute(message, args) {
         const trim = (str, max) => ((str.length > max) ? `${str.slice(0, max - 3)}...` : str);

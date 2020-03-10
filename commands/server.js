@@ -2,7 +2,7 @@ module.exports = {
 	name: "server",
 	desc: "Get server info. Works only on servers.",
 	guildOnly: true,
-	execute(message, args) {
+	execute(message) {
 		const info = [`Serverin nimi on ${message.guild.name}`,
 			`Jäseniä: ${message.guild.memberCount}`
 		];

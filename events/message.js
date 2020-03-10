@@ -17,15 +17,15 @@ module.exports = async (client, message) => {
         || client.secrets.get(commandName)
         || client.secrets.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-
-    if (command === null) return message.reply("Sorry I don't know that one");
-
     // meme checker starts
 
     if (message.content.startsWith(prefix) && makingMeme.get(message.author.id)) return;
     if (makingMeme.has(message.author.id)) setTimeout(() => makingMeme.delete(message.author.id), 2 * 60 * 1000);
 
     // meme checker ends
+
+    if (typeof (command) === "undefined") return message.reply("Sorry I don't know that one");
+
     // Cooldown starts
 
     if (!cooldowns.has(command.name)) cooldowns.set(command.name, new Discord.Collection());

@@ -5,7 +5,7 @@ module.exports = {
     cooldown: 5,
     args: true,
     guildOnly: true,
-    execute(message, args) {
+    execute(message) {
         if (!message.mentions.users.size) {
             return message.reply("No valid user mentioned.");
         }

@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const {
     prefix
 } = require("../config.json");
@@ -6,7 +7,7 @@ module.exports = {
     name: "help",
     desc: "List all of my commands or info about a specific command.",
     aliases: ['commands'],
-    usage: ` | ${prefix}help <command>`,
+    usage: `, ${prefix}help <command>`,
     cooldown: 5,
     execute(message, args) {
         const commandData = [];
@@ -30,10 +31,6 @@ module.exports = {
                 });
         }
 
-        console.log(commands)
-        console.log(games)
-        console.log(secrets)
-
         const name = args[0].toLowerCase();
         const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name))
             || games.get(name) || games.find(c => c.aliases && c.aliases.includes(name));
@@ -48,9 +45,8 @@ module.exports = {
         if (command.description) commandData.push(`**Description:** ${command.description}`);
         commandData.push(`**Usage:** ${prefix}${command.name} ${command.usage || ""}`);
         commandData.push(`**Cooldown:** ${command.cooldown || 2} second(s)`);
-        if(command.guildOnly) commandData.push(`**Server only command**`);
+        if (command.guildOnly) commandData.push(`**Server only command**`);
 
-        message.channel.send(commandData, { split: true });
-
+        return message.channel.send(commandData, { split: true });
     }
 }

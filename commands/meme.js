@@ -9,7 +9,7 @@ const {
 module.exports = {
     name: "meme",
     desc: "Make your own memes!",
-    usage: ` | ${prefix}meme <template>`,
+    usage: `, ${prefix}meme <template>`,
     cooldown: 3,
     async execute(message, args) {
         const author = message.author;

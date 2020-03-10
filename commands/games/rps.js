@@ -1,12 +1,12 @@
 module.exports = {
-    name: "rps",
-    desc: "Rock paper scissors",
-    usage: "<choice>",
+    name: `rps`,
+    desc: `Rock paper scissors`,
+    usage: `<choice>`,
     args: true,
     execute(message, args) {
-        const choices = ["rock", "paper", "scissors"];
+        const choices = [`rock`, `paper`, `scissors`];
 
-        if (!choices.includes(args[0])) return message.reply("Give rock, paper or scissors");
+        if (!choices.includes(args[0])) return message.reply(`Give rock, paper or scissors`);
 
         const choice = Math.floor(Math.random() * choices.length);
 
