@@ -1,4 +1,4 @@
-const siegeOperators = [
+module.exports = siegeOperators = [
     {
         operatorID: "2:1",
         operator: "Smoke"
@@ -204,5 +204,3 @@ const siegeOperators = [
         operator: "Mozzie"
     }
 ]
-
-module.exports = siegeOperators;

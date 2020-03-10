@@ -24,8 +24,8 @@ module.exports = {
             if (error) return console.error(error);
             const json = JSON.parse(body);
 
-            if (index === 0) return message.channel.send({ files: [json[`file`]] });
-            else if (index === 1) return message.channel.send({ files: [json[`url`]] });
+            if (index === 0) return message.channel.send(json[`file`]);
+            else if (index === 1) return message.channel.send(json[`url`]);
         })
     }
 }
