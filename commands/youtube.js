@@ -14,8 +14,11 @@ module.exports = {
 
         if (!voiceChannel) return message.reply('Please join a voice channel first!');
 
+        const clientVoiceChannels = message.client.voice.connections.map(x => x.channel);
+        const sameChannel = clientVoiceChannels.filter(x => x.id === voiceChannel.id)[0];
+
         ytsr.getFilters(args.join(" "), (error, filters) => {
-            if (error) return message.reply("Error");
+            if (error) return message.reply(`Some error occured: ${error}`);
 
             const filter = filters.get('Type').find(o => o.name === 'Video');
             const options = {
@@ -24,7 +27,7 @@ module.exports = {
             }
 
             ytsr(null, options, (error, results) => {
-                if (error) return message.reply("Error");
+                if (error) return message.reply(`Some error occured: ${error}`);
                 return playVideo(results.items[0].link)
             });
         });
@@ -33,8 +36,13 @@ module.exports = {
             voiceChannel.join().then(connection => {
                 const stream = ytdl(url, { filter: 'audioonly' });
                 const dispatcher = connection.play(stream);
-                dispatcher.on('end', () => voiceChannel.leave());
-            }).catch(error => console.log(error));
+                dispatcher.on('finish', () => {
+                    if (typeof sameChannel === "undefined") return voiceChannel.leave();
+                })
+            }).catch(error => {
+                console.log(error);
+                return message.reply(`Some error occured: ${error}`)
+            })
         }
     }
 }
