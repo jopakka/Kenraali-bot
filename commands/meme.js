@@ -1,4 +1,4 @@
-const request = require("request");
+const axios = require('axios');
 const Fuse = require("fuse.js");
 const memeTemplates = require("../constants/memeTemplates");
 const makingMeme = require(`../events/message`).makingMeme;
@@ -103,11 +103,11 @@ module.exports = {
                 boxes: memeTexts.map(text => ({ text: text }))
             }
 
-            request({ url: `https://api.imgflip.com/caption_image`, method: `post`, qs: params }, (error, response, body) => {
-                if (error) return console.error(error);
-                const json = JSON.parse(body)
-                return originalChannel.send(json.data[`url`]);
-            })
+            axios(`https://api.imgflip.com/caption_image`, { params: params })
+                .then(res => {
+                    const json = JSON.parse(res.data)
+                    return originalChannel.send(json.data[`url`]);
+                }).catch(err => console.log(err));
         }
 
         function started() {

@@ -3,7 +3,10 @@ const operators = require(`../constants/siegeOperators`);
 class SiegePlayer {
     constructor(json) {
         const regions = [`NA`, `EU`, `AS`];
-        const times = [new Date(json.ranked.NA_updatedon).valueOf(), new Date(json.ranked.EU_updatedon).valueOf(), new Date(json.ranked.AS_updatedon).valueOf()];
+        const times = [new Date(json.ranked.NA_updatedon).valueOf(),
+            new Date(json.ranked.EU_updatedon).valueOf(),
+            new Date(json.ranked.AS_updatedon).valueOf()
+        ];
 
         const mmr = regions[times.indexOf(Math.max.apply(null, times))] + `_mmr`;
 
@@ -13,12 +16,8 @@ class SiegePlayer {
         this.updated = (json.updatedon).replace(/[</u>]/g, ``);
 
         for (const x of operators) {
-            if (json.favattacker === x.operatorID) {
-                this.favattacker = x.operator;
-            }
-            if (json.favdefender === x.operatorID) {
-                this.favdefender = x.operator;
-            }
+            if (json.favattacker === x.operatorID) this.favattacker = x.operator;
+            if (json.favdefender === x.operatorID) this.favdefender = x.operator;
         }
 
         const pdata = JSON.parse(json.p_data);
@@ -32,7 +31,6 @@ class SiegePlayer {
         this.rankedLoses = pdata[4];
         this.rankedWL = Math.round(((pdata[3] / pdata[4]) + Number.EPSILON) * 100) / 100
         this.shotsFired = pdata[16];
-
     }
 }
 module.exports = SiegePlayer;

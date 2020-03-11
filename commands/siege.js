@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const request = require("request");
+const axios = require('axios');
 const siegePlayer = require("../classes/SiegePlayer");
 const {
     prefix
@@ -24,48 +24,45 @@ module.exports = {
             return message.channel.send("Nyt siege!", { tts: true });
         } else if (args.length === 2) {
             const services = ["uplay", "psn", "xbl"];
+            const url = "https://r6tab.com/api/";
 
             if (services.indexOf(args[0]) === -1) return message.reply("Possible services: uplay, psn ja xbl");
 
-            const url = "https://r6tab.com/api/";
+            const results = await axios(`${url}search.php?platform=${args[0]}&search=${args[1]}`)
+                .then(raw => raw.data.results)
+                .catch(err => console.log(err));
 
-            request({ url: `${url}search.php?platform=${args[0]}&search=${args[1]}` }, (sError, sResponse, sBody) => {
-                if (sError) return console.error(sError);
+            if (typeof results === "undefined") return message.reply("No users found.");
 
-                const searchJson = JSON.parse(sBody).results;
-                if (typeof searchJson === "undefined") return message.reply("No users found.");
+            for (const result of results) {
+                const json = await axios(`${url}player.php?p_id=${result.p_id}`)
+                    .then(raw => raw.data)
+                    .catch(err => console.log(err));
 
-                for (const idJson of searchJson) {
-                    request({ url: `${url}player.php?p_id=${idJson.p_id}` }, (iError, iResponse, iBody) => {
-                        if (iError) return console.error(iError);
+                const player = new siegePlayer(json);
 
-                        const json = JSON.parse(iBody);
-                        const player = new siegePlayer(json);
+                const stats = new Discord.MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle(player.name)
+                    .setThumbnail(`https://ubisoft-avatars.akamaized.net/${player.userId}/default_256_256.png`)
+                    .addField('Level', player.level, true)
+                    .addField('Current MMR', player.currentmmr, true)
+                    .addField('Seasons max MMR', player.maxmmr, true)
+                    .addField('\u200b', '\u200b', false)
+                    .addField("Favorite attacker", player.favattacker, true)
+                    .addField("Favorite defender", player.favdefender, true)
+                    .addField('\u200b', '\u200b', false)
+                    .addField("Ranked K/D", player.rankedKD, true)
+                    .addField("Ranked kills", player.rankedKills, true)
+                    .addField("Ranked deaths", player.rankedDeaths, true)
+                    .addField('\u200b', '\u200b', false)
+                    .addField("Ranked W/L", player.rankedWL, true)
+                    .addField("Ranked wins", player.rankedWins, true)
+                    .addField("Ranked loses", player.rankedLoses, true)
+                    .setFooter(player.updated)
 
-                        const minStats = new Discord.MessageEmbed()
-                            .setColor('#0099ff')
-                            .setTitle(player.name)
-                            .setThumbnail(`https://ubisoft-avatars.akamaized.net/${player.userId}/default_256_256.png`)
-                            .addField('Level', player.level, true)
-                            .addField('Current MMR', player.currentmmr, true)
-                            .addField('Max MMR', player.maxmmr, true)
-                            .addField('\u200b', '\u200b', false)
-                            .addField("Favorite attacker", player.favattacker, true)
-                            .addField("Favorite defender", player.favdefender, true)
-                            .addField('\u200b', '\u200b', false)
-                            .addField("Ranked K/D", player.rankedKD, true)
-                            .addField("Ranked kills", player.rankedKills, true)
-                            .addField("Ranked deaths", player.rankedDeaths, true)
-                            .addField('\u200b', '\u200b', false)
-                            .addField("Ranked W/L", player.rankedWL, true)
-                            .addField("Ranked wins", player.rankedWins, true)
-                            .addField("Ranked loses", player.rankedLoses, true)
-                            .setFooter(player.updated)
-
-                        return message.channel.send(minStats);
-                    })
-                }
-            });
+                return message.channel.send(stats);
+            }
         }
     }
 };
