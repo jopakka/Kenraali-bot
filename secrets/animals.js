@@ -1,4 +1,4 @@
-const request = require("request");
+const axios = require('axios');
 const {
     prefix
 } = require("../config.json");
@@ -8,7 +8,7 @@ module.exports = {
     desc: "Get random picture of animal",
     aliases: ['meow', "woof"],
     cooldown: 10,
-    execute(message) {
+    async execute(message) {
         const urls = [
             "https://aws.random.cat/meow",
             "https://random.dog/woof.json"
@@ -20,12 +20,11 @@ module.exports = {
 
         const index = this.aliases.indexOf(commandName);
 
-        request({ url: `${urls[index]}` }, (error, response, body) => {
-            if (error) return console.error(error);
-            const json = JSON.parse(body);
+        const json = await axios(`${urls[index]}`)
+            .then(raw => raw.data)
+            .catch(err => console.log(err));
 
-            if (index === 0) return message.channel.send(json[`file`]);
-            else if (index === 1) return message.channel.send(json[`url`]);
-        })
+        if (index === 0) return message.channel.send(json[`file`]);
+        else if (index === 1) return message.channel.send(json[`url`]);
     }
 }
