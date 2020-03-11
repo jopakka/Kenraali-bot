@@ -86,7 +86,7 @@ module.exports = {
                         stopped();
                         return dmChannel.send("You stopped meme making");
                     }
-                    memeTexts.push(msg);
+                    memeTexts.push(msg.toUpperCase());
                     fillMeme(template, index);
                 }).catch(error => {
                     console.log(error);
