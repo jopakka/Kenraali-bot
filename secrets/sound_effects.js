@@ -14,14 +14,14 @@ module.exports = {
         if (!this.aliases.includes(commandName)) return message.reply(`Not a valid sound effect`);
         if (!voiceChannel) return message.reply('Please join a voice channel first!');
 
-        const clientVoices = message.client.voice.connections.map(x => x.channel.id);
-        const onVoiceChannel = clientVoices.includes(voiceChannel.id);
-
-        console.log(voiceChannel.player)
+        const clientVoiceChannels = message.client.voice.connections.map(x => x.channel);
+        const sameChannel = clientVoiceChannels.filter(x => x.id === voiceChannel.id)[0];
 
         const connection = await voiceChannel.join();
 
         const dispatcher = connection.play(`./sound_effects/${commandName}.mp3`, { volume: false });
-        if (!onVoiceChannel) return dispatcher.on(`finish`, () => voiceChannel.leave());
+        dispatcher.on('finish', () => {
+            if (typeof sameChannel === "undefined") return voiceChannel.leave();
+        })
     }
 }
