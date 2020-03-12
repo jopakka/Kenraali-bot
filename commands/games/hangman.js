@@ -1,37 +1,51 @@
 const words = require("../../constants/hangmanWords");
+const Hangman = require("../../classes/Hangman");
 
 module.exports = {
     name: `hangman`,
     desc: `Hangman`,
-    execute(message, args) {
+    async execute(message, args) {
+        hangman = new Hangman();
         const embed = string => `\`\`\`${string}\`\`\``;
-        const hangman = [
-            "###########\n##        |\n##\n##\n##\n##\n##\n##",
-            "###########\n##        |\n##        @\n##\n##\n##\n##\n##",
-            "###########\n##        |\n##        @\n##        |\n##        |\n##\n##\n##",
-            "###########\n##        |\n##        @\n##       /|\n##        |\n##\n##\n##",
-            "###########\n##        |\n##        @\n##       /|\\\n##        |\n##\n##\n##",
-            "###########\n##        |\n##        @\n##       /|\\\n##        |\n##       /\n##\n##",
-            "###########\n##        |\n##        @\n##       /|\\\n##        |\n##       / \\\n##\n##"
-        ];
+        const regex = /[A-Z\u00C0-\u00D6]/i;
 
-        const amount = 6;
-        const wrongLetters = [];
-        const rightWord = `_ _ _ _ _`;
-        const info = [
-            `Word: ${rightWord}\n`,
-            `Quesses left: ${amount}\n`,
-            `Wrong letters: ${wrongLetters.join("")}`
-        ];
+        const filter = res => message.author.id === res.author.id
+            && (res.content.length === 1 && res.content.match(regex)
+                && !hangman.quessedLetters.includes(res.content.toUpperCase()) || res.content === "exit");
+        const rules = {
+            max: 1,
+            time: 30000,
+            errors: [`time`]
+        }
 
-        const game = [
-            `${embed(hangman[0])}`,
-            `${embed(info.join(""))}`
-        ];
+        message.channel.send(`You have ${rules.time / 1000} seconds to quess each letter.\nWrite **exit** to quit game`);
 
-        const word = words[Math.floor(Math.random() * words.length)];
-        console.log(word)
+        while (hangman.quesses > 0) {
+            await message.channel.send(getGame());
+            const game = await message.channel.awaitMessages(filter, rules)
+                .then(collected => hangman.quess(collected.first().content))
+                .then(() => hangman.victory())
+                .catch(() => true);
 
-        message.reply(game.join(""))
+            if (game) break;
+        }
+
+        if (hangman.victory()) return message.channel.send(`Congratulations ${message.author}, you win!\nWord was **${hangman.word}**`);
+        else return message.channel.send(`Too bad ${message.author}, you lost!\nWord was **${hangman.word}**`);
+
+        function getGame() {
+            const  info = [
+                `Word: ${hangman.getWord()}\n`,
+                `Quesses left: ${hangman.quesses}\n`,
+                `Wrong letters: ${hangman.getWrongLetters()}`
+            ];
+
+            const game = [
+                `${embed(hangman.getGallows())}`,
+                `${embed(info.join(""))}`
+            ];
+
+            return game.join("")
+        }
     }
 }
