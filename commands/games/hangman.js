@@ -7,6 +7,7 @@ module.exports = {
     async execute(message, args) {
         hangman = new Hangman();
         const embed = string => `\`\`\`${string}\`\`\``;
+        const dmChannel = await author.createDM();
         const regex = /[A-Z\u00C0-\u00D6]/i;
 
         const filter = res => message.author.id === res.author.id
@@ -18,11 +19,20 @@ module.exports = {
             errors: [`time`]
         }
 
-        message.channel.send(`You have ${rules.time / 1000} seconds to quess each letter.\nWrite **exit** to quit game`);
+        if (message.channel.type === 'text')
+
+            dmChannel.send(`You have ${rules.time / 1000} seconds to quess each letter.\nWrite **exit** to quit game`)
+                .then(() => {
+                    if (message.channel.type === 'dm') return;
+                    message.reply(`Game is in your DM`);
+                }).catch(error => {
+                    console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
+                    message.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
+                });
 
         while (hangman.quesses > 0) {
             await message.channel.send(getGame());
-            const game = await message.channel.awaitMessages(filter, rules)
+            const game = await dmChannel.awaitMessages(filter, rules)
                 .then(collected => hangman.quess(collected.first().content))
                 .then(() => hangman.victory())
                 .catch(() => true);
@@ -30,8 +40,8 @@ module.exports = {
             if (game) break;
         }
 
-        if (hangman.victory()) return message.channel.send(`Congratulations ${message.author}, you win!\nWord was **${hangman.word}**`);
-        else return message.channel.send(`Too bad ${message.author}, you lost!\nWord was **${hangman.word}**`);
+        if (hangman.victory()) return dmChannel.send(`Congratulations ${message.author}, you win!\nWord was **${hangman.word}**`);
+        else return dmChannel.send(`Too bad ${message.author}, you lost!\nWord was **${hangman.word}**`);
 
         function getGame() {
             const  info = [
