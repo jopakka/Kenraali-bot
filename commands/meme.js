@@ -96,16 +96,18 @@ module.exports = {
 
         function buildMeme(template) {
             stopped();
+
             const params = {
                 template_id: template.id,
                 username: process.env.IMGFLIP_USERNAME,
-                password: process.env.IMGFLIP_PASSWORD,
-                boxes: memeTexts.map(text => ({ text: text }))
+                password: process.env.IMGFLIP_PASSWORD
             }
+            memeTexts.map((text, index) => params[`boxes[${index}][text]`] = text);
 
-            axios(`https://api.imgflip.com/caption_image`, { params: params })
+            axios(`https://api.imgflip.com/caption_image`, { method:"post", params: params })
                 .then(res => {
-                    const json = JSON.parse(res.data)
+                    const json = res.data;
+                    if (!json.success) return dmChannel.send(`**Error:** ${json.error_message}`);
                     return originalChannel.send(json.data[`url`]);
                 }).catch(err => console.log(err));
         }
