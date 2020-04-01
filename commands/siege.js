@@ -24,30 +24,32 @@ module.exports = {
             return message.channel.send("Nyt siege!", { tts: true });
         } else if (args.length === 2) {
             const services = ["uplay", "psn", "xbl"];
-            const url = "https://r6tab.com/api/";
+            const url = "https://r6.apitab.com/";
+            const dmChannel = await message.author.createDM();
 
             if (services.indexOf(args[0]) === -1) return message.reply("Possible services: uplay, psn ja xbl");
 
-            const results = await axios(`${url}search.php?platform=${args[0]}&search=${args[1]}`)
-                .then(raw => raw.data.results)
+            const results = await axios(`${url}search/${args[0]}/${args[1]}`)
+                .then(raw => Object.keys(raw.data.players))
                 .catch(err => console.log(err));
 
-            if (typeof results === "undefined") return message.reply("No users found.");
+            if (results.length === 0) return message.reply("No users found.");
+            else if (results.length > 1) message.reply(`I send results to your DM`);
 
-            for (const result of results) {
-                const json = await axios(`${url}player.php?p_id=${result.p_id}`)
+            for (const result of Object.values(results)) {
+                const json = await axios(`${url}player/${result}`)
                     .then(raw => raw.data)
                     .catch(err => console.log(err));
 
                 const player = new siegePlayer(json);
 
                 const stats = new Discord.MessageEmbed()
-                    .setColor('#0099ff')
+                    .setColor(player.color)
                     .setTitle(player.name)
-                    .setThumbnail(`https://ubisoft-avatars.akamaized.net/${player.userId}/default_256_256.png`)
+                    .setThumbnail(`https://ubisoft-avatars.akamaized.net/${result}/default_256_256.png`)
                     .addField('Level', player.level, true)
-                    .addField('Current MMR', player.currentmmr, true)
-                    .addField('Seasons max MMR', player.maxmmr, true)
+                    .addField('Current MMR', `${player.currentmmr}\n${player.rankName}`, true)
+                    .addField('Seasons max MMR', `${player.maxmmr}\n${player.maxRankName}`, true)
                     .addField('\u200b', '\u200b', false)
                     .addField("Favorite attacker", player.favattacker, true)
                     .addField("Favorite defender", player.favdefender, true)
@@ -58,10 +60,12 @@ module.exports = {
                     .addField('\u200b', '\u200b', false)
                     .addField("Ranked W/L", player.rankedWL, true)
                     .addField("Ranked wins", player.rankedWins, true)
-                    .addField("Ranked loses", player.rankedLoses, true)
-                    .setFooter(player.updated)
+                    .addField("Ranked losses", player.rankedLosses, true)
 
-                return message.channel.send(stats);
+                if (results.length > 1) {
+                    dmChannel.send(stats)
+                }
+                else message.channel.send(stats);
             }
         }
     }
